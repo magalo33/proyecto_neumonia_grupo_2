@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#este es el repositorio privado de miguel
+
+
 #estado inicial
 from tkinter import *
 from tkinter import ttk, font, filedialog, Entry
