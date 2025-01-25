@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #estado inicial
+# esta es la rama main
+
+
 from tkinter import *
 from tkinter import ttk, font, filedialog, Entry
 
