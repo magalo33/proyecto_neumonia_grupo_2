@@ -4,11 +4,13 @@
 # esta es la rama main
 
 
+import os
 from tkinter import *
 from tkinter import ttk, font, filedialog, Entry
 
 from tkinter.messagebox import askokcancel, showinfo, WARNING
 import getpass
+import tensorflow as tf
 from PIL import ImageTk, Image
 import csv
 import pyautogui
@@ -19,7 +21,22 @@ import time
 tf.compat.v1.disable_eager_execution()
 tf.compat.v1.experimental.output_all_intermediates(True)
 import cv2
+import pydicom as dicom
 
+import tensorflow.keras.backend as K
+from tensorflow.keras.models import load_model
+
+
+# fUNCION PARA MOSTRAR UNA VENTANA DE DIALOGO
+def mostrarDato(filepath):
+    root = Tk()
+    root.withdraw()  # Ocultar la ventana principal
+
+    # Mostrar el cuadro de mensaje
+    showinfo("Información", filepath)
+
+    # Cerrar la ventana principal
+    root.destroy()
 
 def grad_cam(array):
     img = preprocess(array)
@@ -101,6 +118,14 @@ def preprocess(array):
     array = np.expand_dims(array, axis=0)
     return array
 
+def model_fun():
+    # Carga un modelo ya entrenado
+    model = load_model("Modelo de Neumonia .h5-20250126/conv_MLP_84.h5", compile=False)
+    
+    # Asegúrate de que la capa "conv10_thisone" exista realmente en el modelo
+    # Si tu capa final no se llama conv10_thisone, cambia este nombre según corresponda.
+    
+    return model
 
 class App:
     def __init__(self):
@@ -149,7 +174,7 @@ class App:
             self.root, text="Cargar Imagen", command=self.load_img_file
         )
         self.button3 = ttk.Button(self.root, text="Borrar", command=self.delete)
-        self.button4 = ttk.Button(self.root, text="PDF", command=self.create_pdf)
+        self.button4 = ttk.Button(self.root, text="PDF", command=self.guardar_jpeg)
         self.button6 = ttk.Button(
             self.root, text="Guardar", command=self.save_results_csv
         )
@@ -196,12 +221,31 @@ class App:
                 ("png files", "*.png"),
             ),
         )
+
+
+            
         if filepath:
-            self.array, img2show = read_dicom_file(filepath)
+
+            ext = os.path.splitext(filepath)[1].lower()
+
+            if ext == ".dcm":
+                try:
+                    self.array, img2show = read_dicom_file(filepath)
+                except Exception as e:
+                    return
+            elif ext in (".jpg", ".jpeg", ".png",".JPG",".JPEG"):
+                self.array, img2show = read_jpg_file(filepath)
+            else:
+                mostrarDato("Formato de archivo no soportado.")
+                return
+
             self.img1 = img2show.resize((250, 250), Image.ANTIALIAS)
             self.img1 = ImageTk.PhotoImage(self.img1)
             self.text_img1.image_create(END, image=self.img1)
             self.button1["state"] = "enabled"
+        else:
+            mostrarDato("filepath es nulo")
+            return
 
     def run_model(self):
         self.label, self.proba, self.heatmap = predict(self.array)
@@ -231,6 +275,18 @@ class App:
         img.save(pdf_path)
         self.reportID += 1
         showinfo(title="PDF", message="El PDF fue generado con éxito.")
+
+    def guardar_jpeg(self):
+        # Nombre de salida
+        filename = "mi_formulario.jpg"
+        
+        # Creamos el objeto de captura
+        cap = tkcap.CAP(self.root)
+        
+        # Capturamos la ventana principal y guardamos
+        cap.capture(filename)  # Esto genera "mi_formulario.jpg"
+        
+        showinfo("Captura", f"El formulario se guardó como {filename}")            
 
     def delete(self):
         answer = askokcancel(
