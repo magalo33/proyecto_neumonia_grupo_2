@@ -10,19 +10,11 @@ from tkinter.messagebox import askokcancel, showinfo, WARNING
 from PIL import ImageTk
 import tkcap
 
-from detector_neumonia import mostrarDato, predict, read_dicom_file, read_jpg_file
-import load_model
+
+from integrator import read_dicom, read_jpg, prediction
+
 
 # Importamos la función de integración:
-
-def model_fun():
-    # Carga un modelo ya entrenado
-    model = load_model("Modelo de Neumonia .h5-20250126/conv_MLP_84.h5", compile=False)
-    
-    # Asegúrate de que la capa "conv10_thisone" exista realmente en el modelo
-    # Si tu capa final no se llama conv10_thisone, cambia este nombre según corresponda.
-    
-    return model
 
 class App:
     def __init__(self):
@@ -127,13 +119,13 @@ class App:
 
             if ext == ".dcm":
                 try:
-                    self.array, img2show = read_dicom_file(filepath)
+                    self.array, img2show = read_dicom(filepath)
                 except Exception as e:
                     return
             elif ext in (".jpg", ".jpeg", ".png",".JPG",".JPEG"):
-                self.array, img2show = read_jpg_file(filepath)
+                self.array, img2show = read_jpg(filepath)
             else:
-                mostrarDato("Formato de archivo no soportado.")
+                self.mostrarDato("Formato de archivo no soportado.")
                 return
 
             self.img1 = img2show.resize((250, 250), Image.ANTIALIAS)
@@ -141,11 +133,11 @@ class App:
             self.text_img1.image_create(END, image=self.img1)
             self.button1["state"] = "enabled"
         else:
-            mostrarDato("filepath es nulo")
+            self.mostrarDato("filepath es nulo")
             return
 
-    def run_model(self):
-        self.label, self.proba, self.heatmap = predict(self.array)
+    def run_model(self):       
+        self.label, self.proba, self.heatmap = prediction(self.array) 
         self.img2 = Image.fromarray(self.heatmap)
         self.img2 = self.img2.resize((250, 250), Image.ANTIALIAS)
         self.img2 = ImageTk.PhotoImage(self.img2)
@@ -196,6 +188,17 @@ class App:
             self.text_img1.delete(self.img1, "end")
             self.text_img2.delete(self.img2, "end")
             showinfo(title="Borrar", message="Los datos se borraron con éxito")
+
+    # fUNCION PARA MOSTRAR UNA VENTANA DE DIALOGO
+    def mostrarDato(self,filepath):
+        root = Tk()
+        root.withdraw()  # Ocultar la ventana principal
+
+        # Mostrar el cuadro de mensaje
+        showinfo("Información", filepath)
+
+        # Cerrar la ventana principal
+        root.destroy()            
 
 
 def main():
