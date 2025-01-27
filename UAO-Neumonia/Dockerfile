@@ -18,6 +18,3 @@ COPY . ./
 RUN pip install --upgrade pip && \
     pip install --upgrade --no-cache-dir pydicom && \
     pip install --no-cache-dir -r requirements.txt
-
-# (Opcional) Si tu contenedor necesita ejecutar algo en particular al arrancar:
-# CMD ["python", "tu_script.py"]
