@@ -1,10 +1,13 @@
+tensorflow
 pyautogui
 pillow
 tkcap
 pydicom
 img2pdf
-opencv_python
+opencv-python
 matplotlib
 pandas
-tensorflow
 python-xlib
+protobuf
+keras
+pytest
