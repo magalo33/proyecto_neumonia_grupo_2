@@ -9,16 +9,7 @@ from tkinter.messagebox import askokcancel, showinfo, WARNING
 
 import tkcap
 
-
-
-
-
-
-
 from integrator import read_dicom, read_jpg, prediction
-
-
-
 
 class App:
     def __init__(self):
@@ -100,7 +91,7 @@ class App:
             self.root, text="Cargar Imagen", command=self.load_img_file
         )
         self.button3 = ttk.Button(self.root, text="Borrar", command=self.delete)
-        self.button4 = ttk.Button(self.root, text="PDF", command=self.guardar_jpeg)
+        self.button4 = ttk.Button(self.root, text="PDF", command=self.create_pdf)
         self.button6 = ttk.Button(
             self.root, text="Guardar", command=self.save_results_csv
         )
@@ -176,13 +167,26 @@ class App:
                 self.mostrarDato("Formato de archivo no soportado.")
                 return
 
-            self.img1 = img2show.resize((250, 250), Image.ANTIALIAS)
+            #self.img1 = img2show.resize((250, 250), Image.ANTIALIAS)
+            self.img1 = img2show.resize((250, 250), Image.LANCZOS)
             self.img1 = ImageTk.PhotoImage(self.img1)
             self.text_img1.image_create(END, image=self.img1)
             self.button1["state"] = "enabled"
         else:
             self.mostrarDato("filepath es nulo")
             return
+
+    def create_pdf(self):
+            cap = tkcap.CAP(self.root)
+            ID = "Reporte" + str(self.reportID) + ".jpg"
+            img = cap.capture(ID)
+            img = Image.open(ID)
+            img = img.convert("RGB")
+            pdf_path = r"Reporte" + str(self.reportID) + ".pdf"
+            img.save(pdf_path)
+            self.reportID += 1
+            showinfo(title="PDF", message="El PDF fue generado con éxito.")
+
 
     def guardar_jpeg(self):
         """
@@ -219,7 +223,9 @@ class App:
         """
         self.label, self.proba, self.heatmap = prediction(self.array) 
         self.img2 = Image.fromarray(self.heatmap)
-        self.img2 = self.img2.resize((250, 250), Image.ANTIALIAS)
+        #self.img2 = self.img2.resize((250, 250), Image.ANTIALIAS)
+
+        self.img2 = self.img2.resize((250, 250), Image.LANCZOS)
         self.img2 = ImageTk.PhotoImage(self.img2)
         print("OK")
         self.text_img2.image_create(END, image=self.img2)
