@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-# Instala dependencias del sistema en un solo RUN
+# Instalar dependencias
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         python3-opencv \
@@ -11,10 +11,15 @@ RUN apt-get update -y && \
 
 WORKDIR /home/src
 
+# Crea y activa el entorno virtual
+RUN python -m venv venv
+
+
 # Copia tu código al contenedor
 COPY . ./
 
-# Instala dependencias de Python (en un solo RUN para optimizar capas)
+# Instalar dependencias de Python (en un solo RUN para optimizar capas)
 RUN pip install --upgrade pip && \
     pip install --upgrade --no-cache-dir pydicom && \
     pip install --no-cache-dir -r requirements.txt
+

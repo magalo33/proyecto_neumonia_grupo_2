@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import tensorflow.keras.backend as K
+from tensorflow.keras.models import Model
 
 from load_model import get_model
 from preprocess_img import preprocess
@@ -38,7 +39,8 @@ def grad_cam(array):
         predicted_class = tf.argmax(predictions[0])
         loss = predictions[:, predicted_class]
 
-    # Calcular gradientes de la pérdida con respecto a las salidas de la capa convolucional
+    # Calcular gradientes de la pérdida con respecto a las salidas de la capa 
+    # convolucional
     grads = tape.gradient(loss, conv_outputs)
 
     # Promediar los gradientes sobre los ejes espaciales
